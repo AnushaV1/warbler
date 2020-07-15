@@ -1,0 +1,16 @@
+Look over the code in app.py related to authentication.
+
+How is the logged in user being kept track of?
+The logged in user id is stored in the session[CURR_USER_KEY] = user.id
+
+
+What is Flask’s g object?
+
+  g is a global namespace for holding any data you want during a single app context.
+     For example, a before_request handler could set g. user , which will be accessible to the route and other functions.
+
+What is the purpose of add_user_to_g?
+The add_user_to_go stores the user's information/profile to the global space.
+
+What does @app.before_request mean?
+@app.before_request runs the function before any requests are made from browser.
