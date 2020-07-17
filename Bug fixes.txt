@@ -14,3 +14,12 @@ The add_user_to_go stores the user's information/profile to the global space.
 
 What does @app.before_request mean?
 @app.before_request runs the function before any requests are made from browser.
+
+
+Fixed the logout route in app.py
+Fixed the user profile to show location, bio, header_image
+Fixed the user cards in following and followers pages 
+Fixed the edit profile page.
+Added likes functionality to app.py, display # of likes, onclick the numbers
+linked to likes.html 
+Fixed the header image in profile page

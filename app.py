@@ -64,7 +64,8 @@ def signup():
     If the there already is a user with that username: flash message
     and re-present form.
     """
-
+    if CURR_USER_KEY in session:
+        del session[CURR_USER_KEY]
     form = UserAddForm()
 
     if form.validate_on_submit():
@@ -209,6 +210,43 @@ def stop_following(follow_id):
 
     return redirect(f"/users/{g.user.id}/following")
 
+#########################  Likes ################
+@app.route('/users/<int:user_id>/likes', methods=["GET"])
+def users_likes(user_id):
+    """Show list of followers liked messages of this user."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    return render_template('users/likes.html', user=user)
+
+# users - add -like
+@app.route('/messages/<int:msg_id>/like', methods=['POST'])
+def add_like(msg_id):
+    """Have currently-logged-in-user likes the msg."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    liked_msg = Message.query.get_or_404(msg_id)
+    
+    if liked_msg.user_id == g.user.id:
+        flash("You can't like your own messages","warning")
+        return redirect(f"/users/{g.user.id}")
+
+    if liked_msg in g.user.likes:
+        g.user.likes = [like for like in g.user.likes if like != liked_msg]
+        
+    else:
+        g.user.likes.append(liked_msg)
+
+    db.session.commit()
+
+    return redirect(f"/users/{g.user.id}/likes")
+
 
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
@@ -226,6 +264,7 @@ def profile():
         if User.authenticate(profile.username, form.password.data):
             profile.username = form.username.data
             profile.email = form.email.data
+            profile.location = form.location.data
             profile.image_url = form.image_url.data or "/static/images/default-pic.png"
             profile.header_image_url = form.header_image_url.data
             profile.bio = form.bio.data
@@ -297,7 +336,11 @@ def messages_destroy(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get(message_id)
+    msg = Message.query.get_or_404(message_id)
+    if msg.user_id != g.user.id:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
     db.session.delete(msg)
     db.session.commit()
 
@@ -323,11 +366,19 @@ def homepage():
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
+        liked_msg_ids = [msg.id for msg in g.user.likes]
 
-        return render_template('home.html', messages=messages)
+        return render_template('home.html', messages=messages, likes=liked_msg_ids)
 
     else:
         return render_template('home-anon.html')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """404 NOT FOUND page."""
+
+    return render_template('404.html'), 404
 
 
 ##############################################################################
