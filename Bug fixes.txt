@@ -20,6 +20,10 @@ Fixed the logout route in app.py
 Fixed the user profile to show location, bio, header_image
 Fixed the user cards in following and followers pages 
 Fixed the edit profile page.
-Added likes functionality to app.py, display # of likes, onclick the numbers
+Added likes functionality to app.py, display # of likes, on click the numbers
 linked to likes.html 
 Fixed the header image in profile page
+Added custom 404 pages
+Fixed homepage 
+changed some redirect url using url_for
+Added python decorator for login authentication check
